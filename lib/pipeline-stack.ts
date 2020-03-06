@@ -7,6 +7,7 @@ import * as s3 from "@aws-cdk/aws-s3";
 import { App, Stack, StackProps, SecretValue } from "@aws-cdk/core";
 import { CloudFrontWebDistribution } from "@aws-cdk/aws-cloudfront";
 import * as SSM from "@aws-cdk/aws-ssm";
+import * as IAM from "@aws-cdk/aws-iam";
 
 // export interface PipelineStackProps extends StackProps {
 //   readonly lambdaCode: lambda.CfnParametersCode;
@@ -72,6 +73,28 @@ export class PipelineStack extends Stack {
       publicReadAccess: true
     });
 
+    const stagingBucket = new s3.Bucket(this, "StagingBucket", {});
+
+    const roleBuild = new IAM.Role(this, "BuildRole", {
+      assumedBy: new IAM.ServicePrincipal("codebuild.amazonaws.com")
+    });
+
+    // roleBuild.addToPolicy(
+    //   new IAM.PolicyStatement({
+    //     actions: ["*"],
+    //     resources: [stagingBucket.bucketArn],
+    //     effect: IAM.Effect.ALLOW
+    //   })
+    // );
+
+    roleBuild.addToPolicy(
+      new IAM.PolicyStatement({
+        actions: ["*"],
+        resources: ["*"],
+        effect: IAM.Effect.ALLOW
+      })
+    );
+
     const frontendBuild = new codebuild.PipelineProject(this, "FrontendBuild", {
       buildSpec: codebuild.BuildSpec.fromObject({
         version: "0.2",
@@ -107,7 +130,8 @@ export class PipelineStack extends Stack {
             value: targetBucket.bucketName
           }
         }
-      }
+      },
+      role: roleBuild
     });
 
     // const cdkBuildOutput = new codepipeline.Artifact("CdkBuildOutput");
@@ -141,6 +165,7 @@ export class PipelineStack extends Stack {
     });
 
     new codepipeline.Pipeline(this, "Pipeline", {
+      artifactBucket: stagingBucket,
       stages: [
         {
           stageName: "Source",
