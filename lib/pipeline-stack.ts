@@ -77,10 +77,14 @@ export class PipelineStack extends Stack {
         version: "0.2",
         phases: {
           install: {
-            commands: ["touch .npmignore", "npm install -g gatsby"]
+            commands: [
+              "cd frontend",
+              "touch .npmignore",
+              "npm install -g gatsby"
+            ]
           },
           pre_build: {
-            commands: ["cd frontend", "npm ci --production"]
+            commands: "npm ci --production"
           },
           build: {
             commands: "npm run-script build"
