@@ -97,13 +97,6 @@ export class PipelineStack extends Stack {
           "base-directory": "frontend/public",
           files: ["**/*"],
           discardPaths: "no"
-        },
-        cache: {
-          paths: [
-            "frontend/.cache/*",
-            "frontend/public/*",
-            "frontend/node_modules/**/*"
-          ]
         }
       }),
       environment: {
