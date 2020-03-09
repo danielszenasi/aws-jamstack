@@ -81,8 +81,8 @@ export class PipelineStack extends Stack {
 
     // roleBuild.addToPolicy(
     //   new IAM.PolicyStatement({
-    //     actions: ["*"],
-    //     resources: [stagingBucket.bucketArn],
+    //     actions: ["s3:GetObject"],
+    //     resources: [`${stagingBucket.bucketArn}/*`],
     //     effect: IAM.Effect.ALLOW
     //   })
     // );
@@ -90,7 +90,7 @@ export class PipelineStack extends Stack {
     roleBuild.addToPolicy(
       new IAM.PolicyStatement({
         actions: ["*"],
-        resources: ["*"],
+        resources: [`${targetBucket.bucketArn}`, `${targetBucket.bucketArn}/*`],
         effect: IAM.Effect.ALLOW
       })
     );
@@ -135,9 +135,9 @@ export class PipelineStack extends Stack {
     });
 
     // const cdkBuildOutput = new codepipeline.Artifact("CdkBuildOutput");
-    const frontendBuildOutput = new codepipeline.Artifact(
-      "FrontendBuildOutput"
-    );
+    // const frontendBuildOutput = new codepipeline.Artifact(
+    //   "FrontendBuildOutput"
+    // );
 
     // // Store S3 Bucket Name in Parameter Store
     // new SSM.StringParameter(this, "SSMBucketAssetsName", {
@@ -177,8 +177,7 @@ export class PipelineStack extends Stack {
             new codepipeline_actions.CodeBuildAction({
               actionName: "Frontend_Build",
               project: frontendBuild,
-              input: sourceOutput,
-              outputs: [frontendBuildOutput]
+              input: sourceOutput
             })
           ]
         }
